@@ -1,6 +1,6 @@
 {
   "name": "voilab-express-router",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Library that allow definition of internationalized and named routes on express.",
   "main": "voilab-express-router.js",
   "scripts": {

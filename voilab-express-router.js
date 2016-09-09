@@ -71,7 +71,7 @@
                         i18nextMiddleware.addRoute.apply(i18nextMiddleware, [
                             i18n,
                             path,
-                            lngs || self.i18n.options.whitelist || [],
+                            lngs || self.i18n.options.preload || self.i18n.options.whitelist || [],
                             app,
                             method
                         ].concat(args));
@@ -114,7 +114,7 @@
             app.locals.urlI18n = function (name, params, defaultParams) {
                 params = params || {};
                 lodash.defaults(params, defaultParams);
-                params.lng = params.lng || self.i18n.language;
+                params.lng = params.lng || self.i18n.language || self.i18n.options.preload[0];
 
                 // le router voilab ne gère pas les routes en regexp. Il faut
                 // cependant en tenir compte ici, via le name [raw]
