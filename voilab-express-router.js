@@ -71,7 +71,7 @@
                         i18nextMiddleware.addRoute.apply(i18nextMiddleware, [
                             i18n,
                             path,
-                            lngs || self.i18n.options.supportedLngs || [],
+                            lngs || self.i18n.options.whitelist || [],
                             app,
                             method
                         ].concat(args));
