@@ -8,6 +8,7 @@
     Voilab = function () {
         this.nrouter = new Router();
         this.i18n = null;
+        this.i18nMiddleware = null;
     };
 
     Voilab.prototype = {
@@ -16,11 +17,16 @@
             return this;
         },
 
+        setI18nMiddleware: function (value) {
+            this.i18nMiddleware = value;
+            return this;
+        },
+
         getWebroot: function () {
             return this.webroot || '/';
         },
 
-        extendExpress: function (app, i18n) {
+        extendExpress: function (app, i18n, i18nextMiddleware) {
             var methods = require('methods'), // retourne la liste des verbes HTTP reconnus par Node.js
                 self = this;
 
@@ -62,15 +68,13 @@
                     this.namedRoutes.add(method, path, [], {name: name});
 
                     if (self.i18n && i18n) {
-                        return self.i18n.addRoute.apply(
-                            self.i18n,
-                            [
-                                path,
-                                lngs || self.i18n.options.supportedLngs || [],
-                                app,
-                                method
-                            ].concat(args)
-                        );
+                        i18nextMiddleware.addRoute.apply(i18nextMiddleware, [
+                            i18n,
+                            path,
+                            lngs || self.i18n.options.supportedLngs || [],
+                            app,
+                            method
+                        ].concat(args));
                     }
 
                     args.unshift(path);
@@ -110,7 +114,7 @@
             app.locals.urlI18n = function (name, params, defaultParams) {
                 params = params || {};
                 lodash.defaults(params, defaultParams);
-                params.lng = params.lng || self.i18n.lng();
+                params.lng = params.lng || self.i18n.language;
 
                 // le router voilab ne gère pas les routes en regexp. Il faut
                 // cependant en tenir compte ici, via le name [raw]
@@ -149,9 +153,10 @@
         /**
          * Créer une instance du routeur d'express et l'étend avec voilabrouter.
          *
-         * @param {Bool} i18n par défaut, prend la valeur de this.i18n
+         * @param {i18next} [i18n] une instance de i18next
+         * @param {i18next-express-middleware} [i18nMiddleware] Middleware pour i18next dans Express
          */
-        Router: function (i18n) {
+        Router: function (i18n, i18nMiddleware) {
             var express = require('express'),
                 router = express.Router(),
                 self = this;
@@ -159,7 +164,10 @@
             if (i18n === undefined) {
                 i18n = self.i18n;
             }
-            self.extendExpress(router, i18n);
+            if (i18nMiddleware === undefined) {
+                i18nMiddleware = self.i18nMiddleware;
+            }
+            self.extendExpress(router, i18n, i18nMiddleware);
 
             return router;
         }
